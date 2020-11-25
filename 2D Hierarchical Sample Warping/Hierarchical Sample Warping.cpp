@@ -1,71 +1,71 @@
 #include "Vector2.h"
 #include"Wavelet.h"
-#include"HierarchicalSampleWarping.h"
 #include"Hammersley2d.h"
-#include<iostream>
+#include"HierarchicalSampleWarping.h"
 #include<vector>
-
+#include<stdlib.h>
+#include<algorithm>
+#include <fstream> 
+#include <string>
+#include <iostream>
+#include <streambuf> 
 using namespace std;
 
 int main()
 {
-	vector<vector<Vector2>> Array;
-	vector<Vector2> RowArray1;
-	vector<Vector2> RowArray2;
-	vector<Vector2> RowArray3;
-	vector<Vector2> RowArray4;
-	for (int i = 0; i < 32; i++)
+	//定义文件输出流 
+	ofstream oFile;
+	oFile.open("scoresheet.csv", ios::out | ios::trunc);    //输出一个excel 文件
+	vector<vector<float>> OriginalData;    //随机数矩阵
+	int OriginalDataRow = 32;
+	int OriginalDataColumn = 32;
+	for (int i = 0; i < OriginalDataRow; i++)
 	{
-		CHammersley Hammersley;
-		auto UV = Hammersley.Hammersley2d(i,32);
-		if (UV.y >= 0 && UV.y < 0.25)
-			RowArray1.push_back(UV);
-		else if (UV.y >= 0.25 && UV.y < 0.5)
-			RowArray2.push_back(UV);
-		else if (UV.y >= 0.5 && UV.y < 0.75)
-			RowArray3.push_back(UV);
-		else
-			RowArray4.push_back(UV);
-		cout << "UV:" << "(" << UV.x <<","<< UV.y << ")" << endl;
-	}
-	Array.push_back(RowArray1);
-	Array.push_back(RowArray2);
-	Array.push_back(RowArray3);
-	Array.push_back(RowArray4);
-	double** Data;
-	Data = new double* [8];
-	for (int i = 0; i < 8; i++)
-	{
-		*(Data + i) = new double[8];
+		vector<float> TempStorage;
+		for (int k = 0; k < OriginalDataColumn; k++)
+		{
+			int RandNumber = rand() % 11 + 10;
+			TempStorage.push_back(RandNumber);
+		}
+		OriginalData.push_back(TempStorage);
 	}
 	for (int i = 0; i < 8; i++)
 	{
 		for (int k = 0; k < 8; k++)
 		{
-			Data[i][k] = 1;
+			int RandNumber = rand() % 11 + 240;
+			OriginalData[i][k] = RandNumber;
 		}
 	}
-	Data[7][7] = 10; Data[7][6] = 10; Data[6][7] = 10; Data[6][6] = 10;
-	for (int i = 0; i < 8; i++)
+	for (int i = 24; i < 32; i++)
 	{
-		for (int k = 0; k < 8; k++)
+		for (int k = 24; k < 32; k++)
 		{
-			cout << Data[i][k] << " ";
+			int RandNumber = rand() % 11 + 240;
+			OriginalData[i][k] = RandNumber;
+		}
+	}
+	for (int i = 0; i < OriginalDataRow; i++)
+	{
+		for (int k = 0; k < OriginalDataColumn; k++)
+		{
+			cout << OriginalData[i][k] << " ";
 		}
 		cout << endl;
 	}
+
+	CHammersley Hammersley;
+	vector<vector<Vector2>> SamplePoints = Hammersley.createSamplePoints(64, 8);
+	vector<vector<float>> SampleData = Hammersley.mappingOriginalData(SamplePoints, OriginalData);
 	CHierarchicalSampleWarping HierarchicalSampleWarping;
-	vector<vector<Vector2>> Result = HierarchicalSampleWarping.createTwoDimensionalHierarchicalWarping(Array, Data, 8, 8);
-	cout << "Result:" << endl;
-	for (int i = 0; i < Result.size(); i++)
+	HierarchicalSampleWarping.warpPoints(SamplePoints, SampleData);
+	for (int i = 0; i < SamplePoints.size(); i++)
 	{
-		for (int k = 0; k < Result[i].size(); k++)
+		for (int k = 0; k < SamplePoints[i].size(); k++)
 		{
-			cout << "(" << Result[i][k].x << "," << Result[i][k].y << ")" << endl;
+			oFile << SamplePoints[i][k].x << "," << SamplePoints[i][k].y << endl;
 		}
 	}
-	delete[]Data;
+	oFile.close();
 	return 0;
 }
-
-
