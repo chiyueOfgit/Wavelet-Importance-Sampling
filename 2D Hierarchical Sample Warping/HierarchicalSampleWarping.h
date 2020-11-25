@@ -67,17 +67,17 @@ void CHierarchicalSampleWarping::warpPoints(vector<vector<Vector2>>& vioSamplePo
 {
 	int Level = __judgePower(vSampleData.size()) - 1;
 	float Stride = 1;
-	while (Level)
+	while (Level!=-1)
 	{
 		vector<vector<float>> LevelData = mipMap(vSampleData, Level);
 		for (int i = 0; i < LevelData.size(); i = i + 2)
 		{
-			float vYMaxBorder = 1 - i / LevelData.size();
-			float vYMinBorder = vYMaxBorder - Stride;
 			for (int k = 0; k < LevelData[i].size(); k = k + 2)
 			{
-				float vXMinBorder = k / LevelData[i].size();
+				float vXMinBorder = (float)k / (float)LevelData[i].size();
 				float vXMaxBorder = vXMinBorder + Stride;
+				float vYMaxBorder = 1 - (float)i / (float)LevelData.size();
+				float vYMinBorder = vYMaxBorder - Stride;
 				float Sum = LevelData[i][k] + LevelData[i][k + 1] + LevelData[i + 1][k] + LevelData[i + 1][k + 1];
 				float FrontProbaility = (LevelData[i][k] + LevelData[i][k + 1]) / Sum;
 				float SpiltCoordinate = vYMaxBorder - FrontProbaility * Stride;
